@@ -1,8 +1,40 @@
+# Dependencies
 node_modules/
-.env
-.env.local
-build/
-*.log
-.DS_Store
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Media
+media/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Virtual Environment
+venv/
+.venv/
+env/
