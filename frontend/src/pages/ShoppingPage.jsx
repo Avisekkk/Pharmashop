@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Search, ShoppingCart, X, Minus, Plus, Eye, ArrowLeft,
   AlertTriangle, CheckCircle, Upload, Star, Truck, Shield, Pill
 } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { getMedicineImageWithFallback } from '../medicineImages'
 import { addNotification } from '../notifications'
 
@@ -57,6 +58,7 @@ const saveOrder = (order) => {
 }
 
 export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -64,6 +66,15 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
   const [showRxModal, setShowRxModal] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
   const [rxForm, setRxForm] = useState({ doctorName: '', patientName: '', image: null, imagePreview: null })
+
+  useEffect(() => {
+    if (searchParams.get('cart') === 'open') {
+      setShowCart(true)
+      const next = new URLSearchParams(searchParams)
+      next.delete('cart')
+      setSearchParams(next, { replace: true })
+    }
+  }, [])
 
   const filtered = useMemo(() => {
     return medicines.filter(m => {

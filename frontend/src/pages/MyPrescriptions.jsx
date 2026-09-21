@@ -56,12 +56,16 @@ export default function MyPrescriptions() {
 
   useEffect(() => {
     setPrescriptions(getStoredPrescriptions())
+  }, [])
+
+  useEffect(() => {
     if (searchParams.get('upload') === 'true') {
       setShowUpload(true)
-      searchParams.delete('upload')
-      setSearchParams(searchParams, { replace: true })
+      const next = new URLSearchParams(searchParams)
+      next.delete('upload')
+      setSearchParams(next, { replace: true })
     }
-  }, [])
+  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     const handleClickOutside = (e) => {

@@ -1,6 +1,6 @@
 import { Bell, Search, LogOut, X, ChevronDown, ClipboardList, FileText, ShoppingCart, Upload } from 'lucide-react'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { getNotifications, markAllRead as storeMarkAllRead, removeNotification as storeRemove } from '../notifications'
 
 function getGreeting() {
@@ -11,6 +11,8 @@ function getGreeting() {
 }
 
 export default function Header({ currentRole, currentUser, onLogout, cart, onCartClick }) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [searchOpen, setSearchOpen] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
@@ -88,7 +90,13 @@ export default function Header({ currentRole, currentUser, onLogout, cart, onCar
           </div>
         )}
         {currentRole === 'customer' && (
-          <button className="header-icon-btn" title="My Cart" onClick={onCartClick} style={{ position: 'relative' }}>
+          <button className="header-icon-btn" title="My Cart" onClick={() => {
+            if (location.pathname === '/') {
+              onCartClick()
+            } else {
+              navigate('/?cart=open')
+            }
+          }} style={{ position: 'relative' }}>
             <ShoppingCart size={20} />
             {cartCount > 0 && <span className="notification-badge">{cartCount}</span>}
           </button>
