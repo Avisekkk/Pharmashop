@@ -38,7 +38,7 @@ const inventoryMedicines = [
   { name: 'Metronidazole 400mg', dosage: '400mg' },
 ]
 
-export default function MyPrescriptions() {
+export default function MyPrescriptions({ cart, setCart }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [prescriptions, setPrescriptions] = useState([])
   const [showUpload, setShowUpload] = useState(false)
@@ -206,32 +206,29 @@ export default function MyPrescriptions() {
     setOrderMedicines([...orderMedicines, emptyMedRow()])
   }
 
-  const placeOrder = () => {
+  const addToCart = () => {
     const validMeds = orderMedicines.filter((m) => m.name.trim())
     if (validMeds.length === 0) return
 
     const rx = prescriptions.find((p) => p.id === activeRxId)
-    const orderTotal = validMeds.reduce((sum, m) => sum + (parseInt(m.quantity) || 1), 0) * 0
 
-    const order = {
-      id: Date.now(),
-      patient: rx?.patientName || 'Walk-in',
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
-      status: 'pending',
+    const newItems = validMeds.map((m, i) => ({
+      id: `rx-${activeRxId}-${Date.now()}-${i}`,
+      name: m.name,
+      dosage: m.dosage || '',
+      qty: parseInt(m.quantity) || 1,
+      frequency: m.frequency || '',
+      notes: m.notes || '',
+      price: 0,
+      prescription_required: true,
       prescriptionId: activeRxId,
-      medicines: validMeds.map((m) => ({
-        name: m.name,
-        qty: parseInt(m.quantity) || 1,
-        dosage: m.dosage,
-        frequency: m.frequency,
-        notes: m.notes,
-        price: 0,
-      })),
-      total: 0,
-    }
+      doctorName: rx?.doctorName || '',
+      patientName: rx?.patientName || '',
+      prescriptionDate: rx?.date || '',
+    }))
 
-    saveOrder(order)
+    const updatedCart = [...(cart || []), ...newItems]
+    setCart(updatedCart)
 
     const updatedRx = prescriptions.map((p) =>
       p.id === activeRxId ? { ...p, medicines: validMeds.map((m) => m.name) } : p
@@ -240,8 +237,8 @@ export default function MyPrescriptions() {
     setPrescriptions(updatedRx)
 
     addNotification({
-      title: 'New Order from Prescription',
-      message: `Order #${order.id} from ${order.patient} - ${validMeds.length} medicines`,
+      title: 'Added to Cart',
+      message: `${validMeds.length} medicine${validMeds.length > 1 ? 's' : ''} from Rx #${String(activeRxId).slice(-6)} added to cart`,
       roles: ['admin', 'pharmacist'],
       type: 'order',
     })
@@ -335,7 +332,7 @@ export default function MyPrescriptions() {
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   {activeRxId !== rx.id && (
                     <button className="btn btn-primary btn-sm" onClick={() => startOrderForRx(rx)}>
-                      <ShoppingCart size={14} /> {rx.medicines && rx.medicines.length > 0 ? 'Edit Order' : 'Create Order'}
+                      <ShoppingCart size={14} /> Add to Cart
                     </button>
                   )}
                   <button className="rx-table-remove" onClick={() => removePrescription(rx.id)} title="Delete prescription">
@@ -382,7 +379,7 @@ export default function MyPrescriptions() {
                   <div className="rx-order-section">
                     <div className="rx-order-header">
                       <Sparkles size={18} />
-                      <h3>{prescriptions.find((p) => p.id === activeRxId)?.medicines?.length > 0 ? 'Edit Order' : 'Create Order from Prescription'}</h3>
+                      <h3>{prescriptions.find((p) => p.id === activeRxId)?.medicines?.length > 0 ? 'Edit Medicines' : 'Add Medicines to Cart'}</h3>
                     </div>
 
                     {scanning && (
@@ -502,15 +499,15 @@ export default function MyPrescriptions() {
                         <span className="rx-order-count">{orderMedicines.filter((m) => m.name.trim()).length} medicines</span>
                         {orderPlaced ? (
                           <span className="rx-order-success">
-                            <CheckCircle size={16} /> Order Placed!
+                            <CheckCircle size={16} /> Added to Cart!
                           </span>
                         ) : (
                           <button
                             className="btn btn-primary"
-                            onClick={placeOrder}
+                            onClick={addToCart}
                             disabled={orderMedicines.filter((m) => m.name.trim()).length === 0}
                           >
-                            <ShoppingCart size={16} /> Place Order
+                            <ShoppingCart size={16} /> Add to Cart
                           </button>
                         )}
                       </div>

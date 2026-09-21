@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import {
   Search, ShoppingCart, X, Minus, Plus, Eye, ArrowLeft,
-  AlertTriangle, CheckCircle, Upload, Star, Truck, Shield, Pill
+  AlertTriangle, CheckCircle, Upload, Star, Truck, Shield, Pill, FileText
 } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { getMedicineImageWithFallback } from '../medicineImages'
@@ -114,6 +114,34 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
   const cartCount = cart.reduce((sum, c) => sum + c.qty, 0)
   const hasRxItems = cart.some(c => c.prescription_required)
 
+  const cartGroups = useMemo(() => {
+    const groups = []
+    const rxMap = {}
+    cart.forEach(item => {
+      if (item.prescriptionId) {
+        if (!rxMap[item.prescriptionId]) {
+          rxMap[item.prescriptionId] = {
+            prescriptionId: item.prescriptionId,
+            doctorName: item.doctorName || '',
+            patientName: item.patientName || '',
+            prescriptionDate: item.prescriptionDate || '',
+            items: [],
+          }
+          groups.push(rxMap[item.prescriptionId])
+        }
+        rxMap[item.prescriptionId].items.push(item)
+      } else {
+        let regularGroup = groups.find(g => g.prescriptionId === null)
+        if (!regularGroup) {
+          regularGroup = { prescriptionId: null, items: [] }
+          groups.unshift(regularGroup)
+        }
+        regularGroup.items.push(item)
+      }
+    })
+    return groups
+  }, [cart])
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -126,14 +154,26 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
   }
 
   const placeOrder = (prescriptionId) => {
+    const rxItems = cart.filter(c => c.prescriptionId)
+    const regularItems = cart.filter(c => !c.prescriptionId)
+    const primaryRx = rxItems.length > 0 ? rxItems[0] : null
+
     const order = {
       id: Date.now(),
-      patient: rxForm.patientName || 'Walk-in',
+      patient: primaryRx?.patientName || rxForm.patientName || 'Walk-in',
+      doctorName: primaryRx?.doctorName || '',
+      prescriptionId: primaryRx?.prescriptionId || prescriptionId || null,
       date: new Date().toLocaleDateString(),
       time: new Date().toLocaleTimeString(),
       status: 'pending',
-      prescriptionId,
-      medicines: cart.map(c => ({ name: c.name, qty: c.qty, price: c.price })),
+      medicines: cart.map(c => ({
+        name: c.name,
+        qty: c.qty,
+        price: c.price,
+        dosage: c.dosage || '',
+        frequency: c.frequency || '',
+        notes: c.notes || '',
+      })),
       total: cartTotal,
     }
     saveOrder(order)
@@ -143,10 +183,10 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
       roles: ['admin', 'pharmacist'],
       type: 'order',
     })
-    if (prescriptionId) {
+    if (order.prescriptionId) {
       addNotification({
-        title: 'Prescription Uploaded',
-        message: `Prescription for ${order.patient} submitted with order #${order.id}`,
+        title: 'Prescription Order',
+        message: `Order #${order.id} placed from prescription for ${order.patient}`,
         roles: ['admin', 'pharmacist'],
         type: 'prescription',
       })
@@ -158,7 +198,8 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
   }
 
   const handlePlaceOrder = () => {
-    if (hasRxItems) {
+    const needsNewRx = cart.some(c => c.prescription_required && !c.prescriptionId)
+    if (needsNewRx) {
       setShowRxModal(true)
       return
     }
@@ -325,25 +366,45 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
               </div>
             )}
             <div className="cart-items">
-              {cart.map(item => (
-                <div key={item.id} className="cart-item">
-                  <img {...getMedicineImageWithFallback(item.name)} alt={item.name} className="cart-item-img" />
-                  <div className="cart-item-info">
-                    <span className="cart-item-name">
-                      {item.name}
-                      {item.prescription_required && <span className="rx-badge">Rx</span>}
-                    </span>
-                    <span className="cart-item-price">NPR {item.price}</span>
-                    <div className="cart-item-qty">
-                      <button onClick={() => updateQty(item.id, -1)}><Minus size={14} /></button>
-                      <span>{item.qty}</span>
-                      <button onClick={() => updateQty(item.id, 1)}><Plus size={14} /></button>
+              {cartGroups.map((group, gi) => (
+                <div key={gi}>
+                  {group.prescriptionId !== null && (
+                    <div className="rx-group-header">
+                      <div className="rx-group-header-top">
+                        <FileText size={14} />
+                        <span className="rx-group-title">From Prescription</span>
+                      </div>
+                      <div className="rx-group-meta">
+                        {group.doctorName && <span>Dr. {group.doctorName}</span>}
+                        {group.patientName && <span>{group.patientName}</span>}
+                        {group.prescriptionDate && <span>{group.prescriptionDate}</span>}
+                      </div>
                     </div>
-                  </div>
-                  <div className="cart-item-right">
-                    <span className="cart-item-total">NPR {item.price * item.qty}</span>
-                    <button className="icon-btn danger" onClick={() => removeFromCart(item.id)}><X size={14} /></button>
-                  </div>
+                  )}
+                  {group.items.map(item => (
+                    <div key={item.id} className="cart-item">
+                      <img {...getMedicineImageWithFallback(item.name)} alt={item.name} className="cart-item-img" />
+                      <div className="cart-item-info">
+                        <span className="cart-item-name">
+                          {item.name}
+                          {item.prescription_required && <span className="rx-badge">Rx</span>}
+                        </span>
+                        {item.dosage && <span className="cart-item-detail">{item.dosage}</span>}
+                        {item.frequency && <span className="cart-item-detail">{item.frequency}</span>}
+                        {item.notes && <span className="cart-item-detail">{item.notes}</span>}
+                        <span className="cart-item-price">NPR {item.price}</span>
+                        <div className="cart-item-qty">
+                          <button onClick={() => updateQty(item.id, -1)}><Minus size={14} /></button>
+                          <span>{item.qty}</span>
+                          <button onClick={() => updateQty(item.id, 1)}><Plus size={14} /></button>
+                        </div>
+                      </div>
+                      <div className="cart-item-right">
+                        <span className="cart-item-total">NPR {item.price * item.qty}</span>
+                        <button className="icon-btn danger" onClick={() => removeFromCart(item.id)}><X size={14} /></button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

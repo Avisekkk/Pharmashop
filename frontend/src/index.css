@@ -3147,6 +3147,48 @@ select.inline-edit {
   color: var(--text-muted);
 }
 
+.cart-item-detail {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.rx-group-header {
+  padding: 0.6rem 0.75rem;
+  margin: 0 0 0.25rem;
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.rx-group-header-top {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary);
+  margin-bottom: 0.25rem;
+}
+
+.rx-group-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.rx-group-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.rx-group-meta span {
+  background: var(--bg-card);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
 .cart-item-qty {
   display: flex;
   align-items: center;
