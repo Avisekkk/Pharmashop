@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Truck, Edit3, Trash2, Mail, Phone, MapPin } from 'lucide-react'
+import { Plus, Truck, Edit3, Trash2, Mail, Phone, MapPin, Star, Package } from 'lucide-react'
 
 const initialSuppliers = [
   { id: 1, name: 'Sun Pharma Distributors', contact: 'Rajesh Mehta', email: 'rajesh@sunpharma.com', phone: '+91 98765 43210', address: 'Mumbai, Maharashtra', medicines: 120, rating: 4.5 },
@@ -36,7 +36,10 @@ export default function Suppliers() {
 
       {showForm && (
         <div className="card form-card">
-          <h3 className="card-title">New Supplier</h3>
+          <h3 className="card-title">
+            <Truck size={18} style={{ color: 'var(--secondary)' }} />
+            New Supplier
+          </h3>
           <div className="form-grid">
             <div className="form-group">
               <label>Company Name</label>
@@ -71,7 +74,7 @@ export default function Suppliers() {
           <div key={supplier.id} className="supplier-card card">
             <div className="supplier-header">
               <div className="supplier-avatar">
-                <Truck size={24} />
+                <Truck size={22} />
               </div>
               <div className="supplier-info">
                 <h3>{supplier.name}</h3>
@@ -84,8 +87,8 @@ export default function Suppliers() {
               <div className="detail-row"><MapPin size={14} /> <span>{supplier.address}</span></div>
             </div>
             <div className="supplier-stats">
-              <span>{supplier.medicines} medicines</span>
-              <span className="rating">★ {supplier.rating}</span>
+              <span><Package size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem' }} />{supplier.medicines} medicines</span>
+              <span className="rating"><Star size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.15rem', fill: 'var(--warning)' }} /> {supplier.rating}</span>
             </div>
             <div className="supplier-actions">
               <button className="icon-btn" title="Edit"><Edit3 size={16} /></button>

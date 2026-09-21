@@ -57,10 +57,19 @@ export const salesAPI = {
   create: (data) => api.post('/sales/', data),
 }
 
-export const ocrAPI = {
-  scan: (formData) => api.post('/ocr/scan/', formData, {
+export const prescriptionAPI = {
+  getAll: (params) => api.get('/prescriptions/', { params }),
+  getById: (id) => api.get(`/prescriptions/${id}/`),
+  create: (formData) => api.post('/prescriptions/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  approve: (id, data) => api.post(`/prescriptions/${id}/approve/`, data),
+  reject: (id, data) => api.post(`/prescriptions/${id}/reject/`, data),
+}
+
+export const notificationAPI = {
+  getAll: () => api.get('/notifications/'),
+  markAllRead: () => api.post('/notifications/mark-all-read/'),
 }
 
 export default api

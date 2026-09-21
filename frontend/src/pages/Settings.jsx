@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings as SettingsIcon, User, Shield, Bell, Database, Save } from 'lucide-react'
+import { Settings as SettingsIcon, User, Shield, Bell, Save, Database, Globe, Key } from 'lucide-react'
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('general')
@@ -16,9 +16,9 @@ export default function Settings() {
   })
 
   const tabs = [
-    { id: 'general', label: 'General', icon: SettingsIcon },
+    { id: 'general', label: 'General', icon: Globe },
     { id: 'profile', label: 'Profile', icon: User },
-    { id: 'security', label: 'Security', icon: Shield },
+    { id: 'security', label: 'Security', icon: Key },
     { id: 'notifications', label: 'Notifications', icon: Bell },
   ]
 
@@ -67,7 +67,7 @@ export default function Settings() {
                   <input type="email" value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} />
                 </div>
               </div>
-              <h3>Inventory Thresholds</h3>
+              <h3 style={{ marginTop: '1.5rem' }}>Inventory Thresholds</h3>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Low Stock Threshold</label>
@@ -122,7 +122,7 @@ export default function Settings() {
                 </div>
                 <div className="form-group">
                   <label>Role</label>
-                  <input type="text" value="Administrator" disabled />
+                  <input type="text" value="Administrator" disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
                 </div>
               </div>
             </div>

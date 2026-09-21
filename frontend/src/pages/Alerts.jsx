@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
-  Bell, AlertTriangle, Clock, Package, TrendingDown,
-  CheckCircle, XCircle, Check
+  Bell, AlertTriangle, Clock, TrendingDown,
+  CheckCircle, XCircle, Check, ShieldAlert, Zap
 } from 'lucide-react'
 
 const initialAlerts = [
@@ -12,10 +12,10 @@ const initialAlerts = [
   { id: 5, type: 'sales', severity: 'low', title: 'Sales Milestone', message: 'Paracetamol 500mg reached 300+ sales this month', medicine: 'Paracetamol 500mg', time: '1 day ago', is_read: true },
 ]
 
-const severityIcon = {
-  high: <AlertTriangle size={18} />,
-  medium: <Clock size={18} />,
-  low: <Bell size={18} />,
+const severityConfig = {
+  high: { icon: AlertTriangle, label: 'Critical' },
+  medium: { icon: Clock, label: 'Warning' },
+  low: { icon: Bell, label: 'Info' },
 }
 
 export default function Alerts() {
@@ -60,35 +60,50 @@ export default function Alerts() {
             onClick={() => setFilter(f)}
           >
             {f.charAt(0).toUpperCase() + f.slice(1).replace('-', ' ')}
+            {f === 'unread' && unreadCount > 0 && (
+              <span style={{ marginLeft: '0.3rem', background: 'rgba(255,255,255,0.3)', padding: '0.1rem 0.4rem', borderRadius: '9999px', fontSize: '0.7rem' }}>
+                {unreadCount}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       <div className="alerts-list">
-        {filtered.map((alert) => (
-          <div key={alert.id} className={`alert-item severity-${alert.severity} ${alert.is_read ? 'read' : ''}`}>
-            <div className={`alert-icon severity-${alert.severity}`}>
-              {severityIcon[alert.severity]}
-            </div>
-            <div className="alert-content">
-              <div className="alert-header">
-                <span className="alert-title">{alert.title}</span>
-                <span className="alert-time">{alert.time}</span>
-              </div>
-              <p className="alert-message">{alert.message}</p>
-            </div>
-            <div className="alert-actions">
-              {!alert.is_read && (
-                <button className="icon-btn" onClick={() => markRead(alert.id)} title="Mark as read">
-                  <CheckCircle size={16} />
-                </button>
-              )}
-              <button className="icon-btn danger" title="Dismiss">
-                <XCircle size={16} />
-              </button>
-            </div>
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            <CheckCircle size={48} />
+            <p>No alerts to display</p>
           </div>
-        ))}
+        ) : (
+          filtered.map((alert) => {
+            const { icon: SeverityIcon } = severityConfig[alert.severity]
+            return (
+              <div key={alert.id} className={`alert-item severity-${alert.severity} ${alert.is_read ? 'read' : ''}`}>
+                <div className={`alert-icon severity-${alert.severity}`}>
+                  <SeverityIcon size={18} />
+                </div>
+                <div className="alert-content">
+                  <div className="alert-header">
+                    <span className="alert-title">{alert.title}</span>
+                    <span className="alert-time">{alert.time}</span>
+                  </div>
+                  <p className="alert-message">{alert.message}</p>
+                </div>
+                <div className="alert-actions">
+                  {!alert.is_read && (
+                    <button className="icon-btn" onClick={() => markRead(alert.id)} title="Mark as read">
+                      <CheckCircle size={16} />
+                    </button>
+                  )}
+                  <button className="icon-btn danger" title="Dismiss">
+                    <XCircle size={16} />
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
     </div>
   )

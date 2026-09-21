@@ -4,11 +4,13 @@ from rest_framework.response import Response
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import Category, Supplier, Medicine, Sale, SaleItem, Alert
+from .models import Category, Supplier, Medicine, Sale, SaleItem, Alert, Prescription, Notification
 from .serializers import (
     CategorySerializer, SupplierSerializer, MedicineSerializer,
-    SaleSerializer, SaleItemSerializer, AlertSerializer
+    SaleSerializer, SaleItemSerializer, AlertSerializer,
+    PrescriptionSerializer, NotificationSerializer
 )
+from .ai_engine import AIEngine
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -127,3 +129,157 @@ def recent_activity(request):
         'sales': SaleSerializer(recent_sales, many=True).data,
         'alerts': AlertSerializer(recent_alerts, many=True).data,
     })
+
+
+# ─────────────────────────────────────────────
+#  AI-POWERED ANALYSIS ENDPOINTS (pandas/numpy)
+# ─────────────────────────────────────────────
+
+@api_view(['GET'])
+def ai_stock_health(request):
+    """Analyze stock health for all medicines using pandas/numpy."""
+    medicines_df = AIEngine.medicines_to_dataframe(Medicine.objects.all())
+    sale_items_df = AIEngine.sale_items_to_dataframe(SaleItem.objects.all())
+    analysis = AIEngine.analyze_stock_health_batch(medicines_df, sale_items_df)
+    if analysis.empty:
+        return Response({'results': [], 'summary': {}})
+    summary = {
+        'total_medicines': len(analysis),
+        'critical': int((analysis['stock_health'] == 'critical').sum()),
+        'low': int((analysis['stock_health'] == 'low').sum()),
+        'healthy': int((analysis['stock_health'] == 'healthy').sum()),
+        'total_reorder_quantity': int(analysis['reorder_quantity'].sum()),
+    }
+    results = analysis.to_dict(orient='records')
+    # Convert numpy types to native Python types for JSON serialization
+    for r in results:
+        for k, v in r.items():
+            if hasattr(v, 'item'):
+                r[k] = v.item()
+    return Response({'results': results, 'summary': summary})
+
+
+@api_view(['GET'])
+def ai_expiry_risk(request):
+    """Analyze expiry risk for all medicines using pandas/numpy."""
+    medicines_df = AIEngine.medicines_to_dataframe(Medicine.objects.all())
+    analysis = AIEngine.analyze_expiry_risk_batch(medicines_df)
+    if analysis.empty:
+        return Response({'results': [], 'summary': {}})
+    summary = {
+        'total_medicines': len(analysis),
+        'expired': int((analysis['risk_level'] == 'expired').sum()),
+        'critical': int((analysis['risk_level'] == 'critical').sum()),
+        'high': int((analysis['risk_level'] == 'high').sum()),
+        'medium': int((analysis['risk_level'] == 'medium').sum()),
+        'low': int((analysis['risk_level'] == 'low').sum()),
+        'total_financial_risk': float(analysis['financial_risk'].sum()),
+    }
+    results = analysis.to_dict(orient='records')
+    for r in results:
+        for k, v in r.items():
+            if hasattr(v, 'item'):
+                r[k] = v.item()
+            elif hasattr(v, 'isoformat'):
+                r[k] = v.isoformat()
+    return Response({'results': results, 'summary': summary})
+
+
+@api_view(['GET'])
+def ai_sales_trend(request):
+    """Get sales trend analysis using pandas."""
+    period = request.query_params.get('period', 'D')
+    sales_df = AIEngine.sales_to_dataframe(Sale.objects.all())
+    trend = AIEngine.get_sales_trend(sales_df, period=period)
+    if trend.empty:
+        return Response({'results': [], 'summary': {}})
+    summary = {
+        'total_revenue': float(trend['revenue'].sum()),
+        'total_transactions': int(trend['transactions'].sum()),
+        'avg_daily_revenue': float(trend['revenue'].mean()),
+        'peak_revenue': float(trend['revenue'].max()),
+    }
+    return Response({'results': trend.to_dict(orient='records'), 'summary': summary})
+
+
+@api_view(['GET'])
+def ai_top_selling(request):
+    """Get top selling medicines using pandas."""
+    top_n = int(request.query_params.get('top_n', 5))
+    sales_items_df = AIEngine.sale_items_to_dataframe(SaleItem.objects.all())
+    medicines_df = AIEngine.medicines_to_dataframe(Medicine.objects.all())
+    top = AIEngine.get_top_selling_medicines(sales_items_df, medicines_df, top_n=top_n)
+    if top.empty:
+        return Response({'results': []})
+    results = top.to_dict(orient='records')
+    for r in results:
+        for k, v in r.items():
+            if hasattr(v, 'item'):
+                r[k] = v.item()
+    return Response({'results': results})
+
+
+@api_view(['GET'])
+def ai_inventory_value(request):
+    """Calculate inventory value statistics using numpy."""
+    medicines_df = AIEngine.medicines_to_dataframe(Medicine.objects.all())
+    stats = AIEngine.calculate_inventory_value(medicines_df)
+    return Response(stats)
+
+
+class PrescriptionViewSet(viewsets.ModelViewSet):
+    queryset = Prescription.objects.all()
+    serializer_class = PrescriptionSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        stat = self.request.query_params.get('status', '')
+        if stat:
+            qs = qs.filter(status=stat)
+        return qs
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        prescription = self.get_object()
+        prescription.status = 'approved'
+        prescription.reviewed_by = request.data.get('reviewed_by', 'Admin')
+        prescription.review_note = request.data.get('review_note', '')
+        prescription.reviewed_at = timezone.now()
+        prescription.save()
+
+        Notification.objects.create(
+            notification_type='prescription_approved',
+            title='Prescription Approved',
+            message=f'Your prescription #{prescription.id} has been approved by {prescription.reviewed_by}. You can now collect your medicines.',
+            prescription=prescription,
+            recipient=prescription.patient_name,
+        )
+        return Response({'status': 'approved'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        prescription = self.get_object()
+        prescription.status = 'rejected'
+        prescription.reviewed_by = request.data.get('reviewed_by', 'Admin')
+        prescription.review_note = request.data.get('review_note', '')
+        prescription.reviewed_at = timezone.now()
+        prescription.save()
+
+        Notification.objects.create(
+            notification_type='prescription_rejected',
+            title='Prescription Rejected',
+            message=f'Your prescription #{prescription.id} has been rejected. Reason: {prescription.review_note or "No reason provided."}',
+            prescription=prescription,
+            recipient=prescription.patient_name,
+        )
+        return Response({'status': 'rejected'})
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        Notification.objects.filter(is_read=False).update(is_read=True)
+        return Response({'status': 'all marked as read'})

@@ -1,5 +1,17 @@
 import { useState } from 'react'
-import { Plus, Tag, Edit3, Trash2 } from 'lucide-react'
+import { Plus, Tag, Edit3, Trash2, Pill, Stethoscope, Heart, Shield, Beaker, Dumbbell, Leaf, Box } from 'lucide-react'
+
+const categoryIcons = [Pill, Stethoscope, Heart, Shield, Beaker, Dumbbell, Leaf, Box]
+const categoryColors = [
+  { bg: 'linear-gradient(135deg, #d1fae5, #a7f3d0)', color: '#059669' },
+  { bg: 'linear-gradient(135deg, #fee2e2, #fecaca)', color: '#ef4444' },
+  { bg: 'linear-gradient(135deg, #e0f2fe, #bae6fd)', color: '#0284c7' },
+  { bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', color: '#f59e0b' },
+  { bg: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)', color: '#6366f1' },
+  { bg: 'linear-gradient(135deg, #fce7f3, #fbcfe8)', color: '#ec4899' },
+  { bg: 'linear-gradient(135deg, #ccfbf1, #99f6e4)', color: '#14b8a6' },
+  { bg: 'linear-gradient(135deg, #f3e8ff, #e9d5ff)', color: '#a855f7' },
+]
 
 const initialCategories = [
   { id: 1, name: 'Analgesic', count: 45, description: 'Pain relief medications' },
@@ -43,7 +55,10 @@ export default function Categories() {
 
       {showForm && (
         <div className="card form-card">
-          <h3 className="card-title">New Category</h3>
+          <h3 className="card-title">
+            <Tag size={18} style={{ color: 'var(--primary)' }} />
+            New Category
+          </h3>
           <div className="form-grid">
             <div className="form-group">
               <label>Category Name</label>
@@ -72,22 +87,26 @@ export default function Categories() {
       )}
 
       <div className="categories-grid">
-        {categories.map((cat) => (
-          <div key={cat.id} className="category-card card">
-            <div className="category-icon">
-              <Tag size={24} />
+        {categories.map((cat, i) => {
+          const IconComp = categoryIcons[i % categoryIcons.length]
+          const colorSet = categoryColors[i % categoryColors.length]
+          return (
+            <div key={cat.id} className="category-card card">
+              <div className="category-icon" style={{ background: colorSet.bg, color: colorSet.color }}>
+                <IconComp size={24} />
+              </div>
+              <h3 className="category-name">{cat.name}</h3>
+              <p className="category-desc">{cat.description}</p>
+              <span className="category-count">{cat.count} medicines</span>
+              <div className="category-actions">
+                <button className="icon-btn" title="Edit"><Edit3 size={16} /></button>
+                <button className="icon-btn danger" title="Delete" onClick={() => removeCategory(cat.id)}>
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
-            <h3 className="category-name">{cat.name}</h3>
-            <p className="category-desc">{cat.description}</p>
-            <span className="category-count">{cat.count} medicines</span>
-            <div className="category-actions">
-              <button className="icon-btn" title="Edit"><Edit3 size={16} /></button>
-              <button className="icon-btn danger" title="Delete" onClick={() => removeCategory(cat.id)}>
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

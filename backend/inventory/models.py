@@ -144,3 +144,52 @@ class Alert(models.Model):
 
     def __str__(self):
         return f"[{self.severity}] {self.title}"
+
+
+class Prescription(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
+    patient_name = models.CharField(max_length=200)
+    patient_phone = models.CharField(max_length=20, blank=True)
+    doctor_name = models.CharField(max_length=200, blank=True)
+    prescription_image = models.ImageField(upload_to='prescriptions/')
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_by = models.CharField(max_length=200, blank=True)
+    review_note = models.TextField(blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Prescription #{self.id} - {self.patient_name} ({self.status})"
+
+
+class Notification(models.Model):
+    TYPE_CHOICES = [
+        ('prescription_approved', 'Prescription Approved'),
+        ('prescription_rejected', 'Prescription Rejected'),
+        ('order_ready', 'Order Ready'),
+        ('low_stock', 'Low Stock'),
+    ]
+
+    notification_type = models.CharField(max_length=30, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, null=True, blank=True)
+    recipient = models.CharField(max_length=200, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.notification_type}] {self.title}"

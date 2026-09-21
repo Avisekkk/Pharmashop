@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Supplier, Medicine, Sale, SaleItem, Alert
+from .models import Category, Supplier, Medicine, Sale, SaleItem, Alert, Prescription, Notification
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -51,4 +51,18 @@ class AlertSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Alert
+        fields = '__all__'
+
+
+class PrescriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Prescription
+        fields = '__all__'
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    prescription_id = serializers.IntegerField(source='prescription.id', read_only=True, default=None)
+
+    class Meta:
+        model = Notification
         fields = '__all__'

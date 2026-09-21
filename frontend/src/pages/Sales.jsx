@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import {
-  Plus, Search, ShoppingCart, Trash2, Receipt,
-  ArrowUpRight, ArrowDownRight
+  Plus, Search, ShoppingCart, Trash2,
+  ArrowUpRight, ArrowDownRight, Banknote
 } from 'lucide-react'
 
 const salesHistory = [
@@ -39,28 +39,31 @@ export default function Sales({ currentRole }) {
 
       <div className="sales-stats">
         <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#05966915', color: '#059669' }}>
-            <Receipt size={24} />
-          </div>
           <div className="stat-content">
             <span className="stat-label">Today's Sales</span>
-            <span className="stat-value">₹{todayTotal.toLocaleString()}</span>
+            <span className="stat-value">NPR {todayTotal.toLocaleString()}</span>
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon" style={{ backgroundColor: '#6366f115', color: '#6366f1' }}>
-            <ShoppingCart size={24} />
-          </div>
           <div className="stat-content">
             <span className="stat-label">Today's Transactions</span>
             <span className="stat-value">{todaySales.length}</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-content">
+            <span className="stat-label">Avg. Transaction</span>
+            <span className="stat-value">NPR {todaySales.length ? Math.round(todayTotal / todaySales.length) : 0}</span>
           </div>
         </div>
       </div>
 
       {showNewSale && (
         <div className="card new-sale-card">
-          <h3 className="card-title">New Sale</h3>
+          <h3 className="card-title">
+            <Banknote size={18} style={{ color: 'var(--primary)' }} />
+            New Sale
+          </h3>
           <div className="sale-form">
             <div className="search-input">
               <Search size={18} />
@@ -70,28 +73,31 @@ export default function Sales({ currentRole }) {
               {cartItems.map((item) => (
                 <div key={item.id} className="cart-item">
                   <span className="cart-name">{item.name}</span>
-                  <span className="cart-price">₹{item.price}</span>
+                  <span className="cart-price">NPR {item.price}</span>
                   <div className="qty-control">
                     <button>-</button>
                     <span>{item.qty}</span>
                     <button>+</button>
                   </div>
-                  <span className="cart-total">₹{item.total}</span>
+                  <span className="cart-total">NPR {item.total}</span>
                   <button className="icon-btn danger"><Trash2 size={14} /></button>
                 </div>
               ))}
             </div>
             <div className="sale-total">
               <span>Total:</span>
-              <span className="total-amount">₹{cartItems.reduce((s, i) => s + i.total, 0)}</span>
+              <span className="total-amount">NPR {cartItems.reduce((s, i) => s + i.total, 0)}</span>
             </div>
-            <button className="btn btn-primary">Complete Sale</button>
+            <button className="btn btn-primary full-width">Complete Sale</button>
           </div>
         </div>
       )}
 
       <div className="card table-card">
-        <h3 className="card-title">Sales History</h3>
+        <h3 className="card-title">
+          <Receipt size={18} style={{ color: 'var(--secondary)' }} />
+          Sales History
+        </h3>
         <table className="data-table">
           <thead>
             <tr>
@@ -115,7 +121,7 @@ export default function Sales({ currentRole }) {
                     ))}
                   </div>
                 </td>
-                <td className="price-cell">₹{sale.total}</td>
+                <td className="price-cell">NPR {sale.total}</td>
               </tr>
             ))}
           </tbody>

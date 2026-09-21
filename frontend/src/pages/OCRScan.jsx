@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { ScanLine, Upload, Camera, FileText, CheckCircle, XCircle } from 'lucide-react'
+import { ScanLine, Upload, Camera, FileText, CheckCircle, XCircle, Sparkles } from 'lucide-react'
 
 export default function OCRScan() {
   const [file, setFile] = useState(null)
@@ -20,12 +20,10 @@ export default function OCRScan() {
   const handleScan = async () => {
     if (!file) return
     setScanning(true)
-    // Simulate OCR processing
     setTimeout(() => {
       setResult({
         medicine_name: 'Paracetamol 500mg',
         dosage: '500mg',
-        manufacturer: 'Cipla Ltd',
         batch_number: 'PCM-2024-001',
         expiry_date: '2027-06-30',
         confidence: 94.5,
@@ -54,7 +52,8 @@ export default function OCRScan() {
       <div className="ocr-grid">
         <div className="card upload-card">
           <h3 className="card-title">
-            <Camera size={18} /> Upload Image
+            <Camera size={18} style={{ color: 'var(--primary)' }} />
+            Upload Image
           </h3>
           <div
             className="upload-zone"
@@ -81,6 +80,7 @@ export default function OCRScan() {
             className="btn btn-primary full-width"
             onClick={handleScan}
             disabled={!file || scanning}
+            style={{ marginTop: '1rem' }}
           >
             <ScanLine size={18} />
             {scanning ? 'Scanning...' : 'Scan Medicine'}
@@ -89,12 +89,16 @@ export default function OCRScan() {
 
         <div className="card result-card">
           <h3 className="card-title">
-            <FileText size={18} /> Scan Results
+            <FileText size={18} style={{ color: 'var(--secondary)' }} />
+            Scan Results
           </h3>
           {result ? (
             <div className="scan-result">
               <div className="confidence-bar">
-                <span>Confidence: {result.confidence}%</span>
+                <span>
+                  <Sparkles size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '0.25rem', color: 'var(--primary)' }} />
+                  Confidence: {result.confidence}%
+                </span>
                 <div className="confidence-track">
                   <div
                     className="confidence-fill"
@@ -110,10 +114,6 @@ export default function OCRScan() {
                 <div className="result-field">
                   <label>Dosage</label>
                   <span>{result.dosage}</span>
-                </div>
-                <div className="result-field">
-                  <label>Manufacturer</label>
-                  <span>{result.manufacturer}</span>
                 </div>
                 <div className="result-field">
                   <label>Batch Number</label>
