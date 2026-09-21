@@ -24,18 +24,18 @@ const saveOrder = (order) => {
 const emptyMedRow = () => ({ name: '', dosage: '', quantity: 1, frequency: '', notes: '' })
 
 const inventoryMedicines = [
-  { name: 'Paracetamol 500mg', dosage: '500mg' },
-  { name: 'Amoxicillin 500mg', dosage: '500mg' },
-  { name: 'Cetirizine 10mg', dosage: '10mg' },
-  { name: 'Metformin 500mg', dosage: '500mg' },
-  { name: 'Omeprazole 20mg', dosage: '20mg' },
-  { name: 'Azithromycin 500mg', dosage: '500mg' },
-  { name: 'Vitamin C 500mg', dosage: '500mg' },
-  { name: 'Ciprofloxacin 500mg', dosage: '500mg' },
-  { name: 'Pantoprazole 40mg', dosage: '40mg' },
-  { name: 'Amlodipine 5mg', dosage: '5mg' },
-  { name: 'Montelukast 10mg', dosage: '10mg' },
-  { name: 'Metronidazole 400mg', dosage: '400mg' },
+  { name: 'Paracetamol 500mg', dosage: '500mg', price: 120 },
+  { name: 'Amoxicillin 500mg', dosage: '500mg', price: 450 },
+  { name: 'Cetirizine 10mg', dosage: '10mg', price: 85 },
+  { name: 'Metformin 500mg', dosage: '500mg', price: 320 },
+  { name: 'Omeprazole 20mg', dosage: '20mg', price: 180 },
+  { name: 'Azithromycin 500mg', dosage: '500mg', price: 350 },
+  { name: 'Vitamin C 500mg', dosage: '500mg', price: 150 },
+  { name: 'Ciprofloxacin 500mg', dosage: '500mg', price: 280 },
+  { name: 'Pantoprazole 40mg', dosage: '40mg', price: 200 },
+  { name: 'Amlodipine 5mg', dosage: '5mg', price: 150 },
+  { name: 'Montelukast 10mg', dosage: '10mg', price: 220 },
+  { name: 'Metronidazole 400mg', dosage: '400mg', price: 90 },
 ]
 
 export default function MyPrescriptions({ cart, setCart }) {
@@ -224,20 +224,25 @@ export default function MyPrescriptions({ cart, setCart }) {
 
     const rx = prescriptions.find((p) => p.id === activeRxId)
 
-    const newItems = validMeds.map((m, i) => ({
-      id: `rx-${activeRxId}-${Date.now()}-${i}`,
-      name: m.name,
-      dosage: m.dosage || '',
-      qty: parseInt(m.quantity) || 1,
-      frequency: m.frequency || '',
-      notes: m.notes || '',
-      price: 0,
-      prescription_required: true,
-      prescriptionId: activeRxId,
-      doctorName: rx?.doctorName || '',
-      patientName: rx?.patientName || '',
-      prescriptionDate: rx?.date || '',
-    }))
+    const newItems = validMeds.map((m, i) => {
+      const catalogMatch = inventoryMedicines.find(
+        (inv) => inv.name.toLowerCase() === m.name.trim().toLowerCase()
+      )
+      return {
+        id: `rx-${activeRxId}-${Date.now()}-${i}`,
+        name: m.name,
+        dosage: m.dosage || '',
+        qty: parseInt(m.quantity) || 1,
+        frequency: m.frequency || '',
+        notes: m.notes || '',
+        price: catalogMatch?.price || 0,
+        prescription_required: true,
+        prescriptionId: activeRxId,
+        doctorName: rx?.doctorName || '',
+        patientName: rx?.patientName || '',
+        prescriptionDate: rx?.date || '',
+      }
+    })
 
     const updatedCart = [...(cart || []), ...newItems]
     setCart(updatedCart)
