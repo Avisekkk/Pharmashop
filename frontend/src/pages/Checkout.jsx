@@ -169,8 +169,8 @@ export default function Checkout({ cart, setCart }) {
                           {!item.dosage && !item.frequency && !item.notes && <span>-</span>}
                         </td>
                         <td>{item.qty}</td>
-                        <td>NPR {item.price}</td>
-                        <td className="checkout-item-total">NPR {item.price * item.qty}</td>
+                        <td>{item.price > 0 ? `NPR ${item.price}` : 'On inquiry'}</td>
+                        <td className="checkout-item-total">{item.price > 0 ? `NPR ${item.price * item.qty}` : 'TBD'}</td>
                       </tr>
                     ))}
                   </tbody>

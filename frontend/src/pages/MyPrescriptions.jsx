@@ -226,8 +226,12 @@ export default function MyPrescriptions({ cart, setCart, setShowCart }) {
     const rx = prescriptions.find((p) => p.id === activeRxId)
 
     const newItems = validMeds.map((m, i) => {
+      const nameLower = m.name.trim().toLowerCase()
       const catalogMatch = inventoryMedicines.find(
-        (inv) => inv.name.toLowerCase() === m.name.trim().toLowerCase()
+        (inv) => {
+          const invLower = inv.name.toLowerCase()
+          return invLower === nameLower || invLower.includes(nameLower) || nameLower.includes(invLower)
+        }
       )
       return {
         id: `rx-${activeRxId}-${Date.now()}-${i}`,

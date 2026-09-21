@@ -393,7 +393,7 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
                         {item.dosage && <span className="cart-item-detail">{item.dosage}</span>}
                         {item.frequency && <span className="cart-item-detail">{item.frequency}</span>}
                         {item.notes && <span className="cart-item-detail">{item.notes}</span>}
-                        <span className="cart-item-price">NPR {item.price}</span>
+                        <span className="cart-item-price">{item.price > 0 ? `NPR ${item.price}` : 'Price on inquiry'}</span>
                         <div className="cart-item-qty">
                           <button onClick={() => updateQty(item.id, -1)}><Minus size={14} /></button>
                           <span>{item.qty}</span>
@@ -401,7 +401,7 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
                         </div>
                       </div>
                       <div className="cart-item-right">
-                        <span className="cart-item-total">NPR {item.price * item.qty}</span>
+                        <span className="cart-item-total">{item.price > 0 ? `NPR ${item.price * item.qty}` : 'TBD'}</span>
                         <button className="icon-btn danger" onClick={() => removeFromCart(item.id)}><X size={14} /></button>
                       </div>
                     </div>
