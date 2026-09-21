@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   Clock, CheckCircle, XCircle, FileText, Upload, X, Plus,
   Trash2, Loader2, Sparkles, ShoppingCart, Trash
@@ -38,8 +38,9 @@ const inventoryMedicines = [
   { name: 'Metronidazole 400mg', dosage: '400mg', price: 90 },
 ]
 
-export default function MyPrescriptions({ cart, setCart }) {
+export default function MyPrescriptions({ cart, setCart, setShowCart }) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [prescriptions, setPrescriptions] = useState([])
   const [showUpload, setShowUpload] = useState(false)
   const [viewImage, setViewImage] = useState(null)
@@ -270,7 +271,8 @@ export default function MyPrescriptions({ cart, setCart }) {
       setActiveRxId(null)
       setOrderMedicines([])
       setOrderPlaced(false)
-    }, 2500)
+      navigate('/?cart=open')
+    }, 800)
   }
 
   const startOrderForRx = (rx) => {

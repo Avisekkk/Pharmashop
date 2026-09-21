@@ -96,7 +96,7 @@ export default function App() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/suppliers" element={<Suppliers />} />
             <Route path="/prescriptions" element={<PrescriptionReview />} />
-            <Route path="/my-prescriptions" element={<MyPrescriptions cart={cart} setCart={setCart} />} />
+            <Route path="/my-prescriptions" element={<MyPrescriptions cart={cart} setCart={setCart} setShowCart={setShowCart} />} />
             <Route path="/my-orders" element={<MyOrders />} />
             <Route path="/checkout" element={<Checkout cart={cart} setCart={setCart} />} />
             <Route path="/user-management" element={<UserManagement />} />
