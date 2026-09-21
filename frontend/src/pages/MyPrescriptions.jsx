@@ -295,10 +295,21 @@ export default function MyPrescriptions({ cart, setCart }) {
         doctorName: extracted.doctorName || rx.doctorName || '',
       }
       const updatedList = prescriptions.map((p) => p.id === rx.id ? updatedRx : p)
-      savePrescriptions(updatedList)
-      setPrescriptions(updatedList)
 
       if (extracted.medicines.length > 0) {
+        const updatedWithMeds = updatedList.map((p) =>
+          p.id === rx.id
+            ? { ...p, medicines: extracted.medicines.map((m) => ({
+                name: m.name || '',
+                dosage: m.dosage || '',
+                frequency: m.frequency || '',
+                notes: m.notes || '',
+              })) }
+            : p
+        )
+        savePrescriptions(updatedWithMeds)
+        setPrescriptions(updatedWithMeds)
+
         setOrderMedicines(extracted.medicines.map((m) => ({
           name: m.name || '',
           dosage: m.dosage || '',
@@ -307,6 +318,8 @@ export default function MyPrescriptions({ cart, setCart }) {
           notes: m.notes || '',
         })))
       } else {
+        savePrescriptions(updatedList)
+        setPrescriptions(updatedList)
         setScanError('No medicines detected. Add them manually.')
       }
     } catch (err) {
