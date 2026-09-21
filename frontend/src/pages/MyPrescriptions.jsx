@@ -180,7 +180,12 @@ export default function MyPrescriptions({ cart, setCart }) {
           })))
           const updatedWithMeds = updatedList.map((p) =>
             p.id === rx.id
-              ? { ...p, medicines: extracted.medicines.map((m) => m.name || '') }
+              ? { ...p, medicines: extracted.medicines.map((m) => ({
+                  name: m.name || '',
+                  dosage: m.dosage || '',
+                  frequency: m.frequency || '',
+                  notes: m.notes || '',
+                })) }
               : p
           )
           savePrescriptions(updatedWithMeds)
@@ -238,7 +243,12 @@ export default function MyPrescriptions({ cart, setCart }) {
     setCart(updatedCart)
 
     const updatedRx = prescriptions.map((p) =>
-      p.id === activeRxId ? { ...p, medicines: validMeds.map((m) => m.name) } : p
+      p.id === activeRxId ? { ...p, medicines: validMeds.map((m) => ({
+        name: m.name,
+        dosage: m.dosage || '',
+        frequency: m.frequency || '',
+        notes: m.notes || '',
+      })) } : p
     )
     savePrescriptions(updatedRx)
     setPrescriptions(updatedRx)
@@ -362,11 +372,26 @@ export default function MyPrescriptions({ cart, setCart }) {
                 {rx.medicines && rx.medicines.length > 0 && (
                   <div className="my-rx-meds">
                     <span className="my-rx-meds-title">Medicines ({rx.medicines.length})</span>
-                    {rx.medicines.map((med, i) => (
-                      <div key={i} className="my-rx-med-row">
-                        <span className="my-rx-med-name">{typeof med === 'string' ? med : med.name}</span>
-                      </div>
-                    ))}
+                    <table className="my-rx-meds-table">
+                      <thead>
+                        <tr>
+                          <th>Medicine</th>
+                          <th>Dosage</th>
+                          <th>Frequency</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rx.medicines.map((med, i) => (
+                          <tr key={i}>
+                            <td>{typeof med === 'string' ? med : med.name}</td>
+                            <td>{typeof med === 'object' && med.dosage ? med.dosage : '-'}</td>
+                            <td>{typeof med === 'object' && med.frequency ? med.frequency : '-'}</td>
+                            <td>{typeof med === 'object' && med.notes ? med.notes : '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
 

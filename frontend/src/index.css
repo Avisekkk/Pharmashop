@@ -2110,6 +2110,33 @@ select.inline-edit {
   color: var(--text-muted);
 }
 
+.my-rx-meds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.my-rx-meds-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.my-rx-meds-table td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.my-rx-meds-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .my-rx-total {
   margin-top: 0.75rem;
   text-align: right;
