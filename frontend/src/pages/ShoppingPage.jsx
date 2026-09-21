@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { getMedicineImageWithFallback } from '../medicineImages'
+import { getItemPrice, getItemTotal } from '../medicineCatalog'
 import { addNotification } from '../notifications'
 
 const medicines = [
@@ -111,7 +112,7 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
     setCart(cart.filter(c => c.id !== id))
   }
 
-  const cartTotal = cart.reduce((sum, c) => sum + (c.price * c.qty), 0)
+  const cartTotal = cart.reduce((sum, c) => sum + getItemTotal(c), 0)
   const cartCount = cart.reduce((sum, c) => sum + c.qty, 0)
   const hasRxItems = cart.some(c => c.prescription_required)
 
@@ -393,7 +394,7 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
                         {item.dosage && <span className="cart-item-detail">{item.dosage}</span>}
                         {item.frequency && <span className="cart-item-detail">{item.frequency}</span>}
                         {item.notes && <span className="cart-item-detail">{item.notes}</span>}
-                        <span className="cart-item-price">{item.price > 0 ? `NPR ${item.price}` : 'Price on inquiry'}</span>
+                        <span className="cart-item-price">NPR {getItemPrice(item)}</span>
                         <div className="cart-item-qty">
                           <button onClick={() => updateQty(item.id, -1)}><Minus size={14} /></button>
                           <span>{item.qty}</span>
@@ -401,7 +402,7 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
                         </div>
                       </div>
                       <div className="cart-item-right">
-                        <span className="cart-item-total">{item.price > 0 ? `NPR ${item.price * item.qty}` : 'TBD'}</span>
+                        <span className="cart-item-total">NPR {getItemTotal(item)}</span>
                         <button className="icon-btn danger" onClick={() => removeFromCart(item.id)}><X size={14} /></button>
                       </div>
                     </div>

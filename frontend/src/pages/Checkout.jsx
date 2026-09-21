@@ -5,6 +5,7 @@ import {
   Wallet, Building2, Banknote
 } from 'lucide-react'
 import { getMedicineImageWithFallback } from '../medicineImages'
+import { getItemPrice, getItemTotal } from '../medicineCatalog'
 import { addNotification } from '../notifications'
 
 const paymentMethods = [
@@ -26,7 +27,7 @@ export default function Checkout({ cart, setCart }) {
   const [orderPlaced, setOrderPlaced] = useState(false)
 
   const cartData = location.state?.cart || cart
-  const cartTotal = location.state?.cartTotal || cart.reduce((sum, c) => sum + (c.price * c.qty), 0)
+  const cartTotal = location.state?.cartTotal || cart.reduce((sum, c) => sum + getItemTotal(c), 0)
   const cartGroups = location.state?.cartGroups || buildGroups(cartData)
 
   if (!cartData || cartData.length === 0) {
@@ -81,7 +82,7 @@ export default function Checkout({ cart, setCart }) {
       medicines: cartData.map(c => ({
         name: c.name,
         qty: c.qty,
-        price: c.price,
+        price: getItemPrice(c),
         dosage: c.dosage || '',
         frequency: c.frequency || '',
         notes: c.notes || '',
@@ -169,8 +170,8 @@ export default function Checkout({ cart, setCart }) {
                           {!item.dosage && !item.frequency && !item.notes && <span>-</span>}
                         </td>
                         <td>{item.qty}</td>
-                        <td>{item.price > 0 ? `NPR ${item.price}` : 'On inquiry'}</td>
-                        <td className="checkout-item-total">{item.price > 0 ? `NPR ${item.price * item.qty}` : 'TBD'}</td>
+                        <td>NPR {getItemPrice(item)}</td>
+                        <td className="checkout-item-total">NPR {getItemTotal(item)}</td>
                       </tr>
                     ))}
                   </tbody>
