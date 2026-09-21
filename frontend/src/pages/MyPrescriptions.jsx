@@ -178,6 +178,13 @@ export default function MyPrescriptions({ cart, setCart }) {
             frequency: m.frequency || '',
             notes: m.notes || '',
           })))
+          const updatedWithMeds = updatedList.map((p) =>
+            p.id === rx.id
+              ? { ...p, medicines: extracted.medicines.map((m) => m.name || '') }
+              : p
+          )
+          savePrescriptions(updatedWithMeds)
+          setPrescriptions(updatedWithMeds)
         } else {
           setScanError('No medicines detected. You can add them manually below.')
         }
