@@ -3,7 +3,7 @@ import {
   Search, ShoppingCart, X, Minus, Plus, Eye, ArrowLeft,
   AlertTriangle, CheckCircle, Upload, Star, Truck, Shield, Pill, FileText
 } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { getMedicineImageWithFallback } from '../medicineImages'
 import { addNotification } from '../notifications'
 
@@ -59,6 +59,7 @@ const saveOrder = (order) => {
 
 export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -413,8 +414,11 @@ export default function ShoppingPage({ cart, setCart, showCart, setShowCart }) {
                 <span>Total</span>
                 <span className="cart-total-value">NPR {cartTotal}</span>
               </div>
-              <button className="shop-btn shop-btn-buy" style={{ width: '100%' }} onClick={handlePlaceOrder}>
-                <ShoppingCart size={16} /> Place Order
+              <button className="shop-btn shop-btn-buy" style={{ width: '100%' }} onClick={() => {
+                setShowCart(false)
+                navigate('/checkout', { state: { cart, cartTotal, cartGroups } })
+              }}>
+                <ShoppingCart size={16} /> Proceed to Checkout
               </button>
             </div>
           </>

@@ -22,6 +22,7 @@ import OrderDispensing from './pages/OrderDispensing'
 import PatientDirectory from './pages/PatientDirectory'
 import MyOrders from './pages/MyOrders'
 import ShoppingPage from './pages/ShoppingPage'
+import Checkout from './pages/Checkout'
 
 const DEFAULT_USERS = [
   { name: 'Admin', username: 'admin', password: 'admin123', role: 'admin' },
@@ -97,6 +98,7 @@ export default function App() {
             <Route path="/prescriptions" element={<PrescriptionReview />} />
             <Route path="/my-prescriptions" element={<MyPrescriptions cart={cart} setCart={setCart} />} />
             <Route path="/my-orders" element={<MyOrders />} />
+            <Route path="/checkout" element={<Checkout cart={cart} setCart={setCart} />} />
             <Route path="/user-management" element={<UserManagement />} />
             <Route path="/medicine-approvals" element={<MedicineApprovals />} />
             <Route path="/financial-reports" element={<FinancialReports />} />
